@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# Répertoire d'installation par défaut
+# Répertoire d'installation sur le Bureau de l'utilisateur
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    INSTALL_DIR="$HOME/mp4_analyser"
+    INSTALL_DIR="$HOME/Desktop/mp4_analyser"  # Installation sur le bureau sous Linux
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    INSTALL_DIR="$HOME/mp4_analyser"
+    INSTALL_DIR="$HOME/Desktop/mp4_analyser"  # Installation sur le bureau sous macOS
 elif [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "msys" ]]; then
-    INSTALL_DIR="$USERPROFILE\\Desktop\\mp4_analyser"
+    INSTALL_DIR="$USERPROFILE\\Desktop\\mp4_analyser"  # Installation sur le bureau sous Windows (Git Bash ou MSYS)
 else
     echo "Système d'exploitation non pris en charge."
     exit 1
@@ -40,7 +40,7 @@ download_and_extract() {
     fi
 
     echo "Extraction des fichiers..."
-    unzip mp4_analyser.zip -d $INSTALL_DIR  # Utilisation de l'option -o pour forcer l'écrasement
+    unzip -o -q mp4_analyser.zip -d $INSTALL_DIR  # Utilisation de l'option -o pour forcer l'écrasement
     if [ $? -ne 0 ]; then
         echo "Erreur lors de l'extraction des fichiers."
         exit 1
@@ -52,9 +52,9 @@ replace_existing_files() {
     echo "Vérification des fichiers existants dans $INSTALL_DIR..."
 
     # Si README ou d'autres fichiers existent, les supprimer avant d'extraire les nouveaux fichiers
-    if [ -f "$INSTALL_DIR/mp4_analyser-main/README.md" ]; then
+    if [ -f "$INSTALL_DIR/README.md" ]; then
         echo "README.md trouvé, remplacement en cours..."
-        rm -f "$INSTALL_DIR/mp4_analyser-main/README.md"
+        rm -f "$INSTALL_DIR/README.md"
     fi
 
     # Ajoute ici d'autres fichiers que tu souhaites remplacer s'ils existent
@@ -84,7 +84,7 @@ compile_programs() {
 
 # Fonction principale d'installation
 install() {
-    # Créer le répertoire d'installation s'il n'existe pas
+    # Créer le répertoire d'installation sur le bureau s'il n'existe pas
     if [ ! -d "$INSTALL_DIR" ]; then
         mkdir -p "$INSTALL_DIR"
     fi
