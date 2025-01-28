@@ -17,7 +17,7 @@ install_dependencies() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo "Installation des dépendances sur Linux..."
         sudo apt-get update
-        sudo apt-get install -y curl libncurses5-dev libjansson-dev libcurl4-openssl-dev  # Ajout de libcurl
+        sudo apt-get install -y curl libncurses5-dev libjansson-dev
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installation des dépendances sur macOS..."
         brew install curl ncurses jansson
@@ -27,6 +27,35 @@ install_dependencies() {
     else
         echo "Système d'exploitation non pris en charge pour l'installation des dépendances."
         exit 1
+    fi
+}
+
+# Fonction pour installer libcurl dans le répertoire du projet si non installé
+install_libcurl() {
+    echo "Vérification de la présence de libcurl..."
+
+    if [[ ! -f "$INSTALL_DIR/libcurl.a" && ! -f "$INSTALL_DIR/libcurl.so" ]]; then
+        echo "libcurl non trouvé. Téléchargement et installation dans le répertoire du projet..."
+
+        # Télécharger et extraire libcurl si elle n'est pas présente
+        cd $INSTALL_DIR
+        curl -LO https://curl.se/download/curl-7.79.1.tar.gz
+        tar -xvf curl-7.79.1.tar.gz
+        cd curl-7.79.1
+
+        # Compilation de libcurl
+        ./configure --prefix=$INSTALL_DIR
+        make
+        make install
+
+        # Vérification de l'installation de libcurl
+        if [ $? -ne 0 ]; then
+            echo "Erreur lors de l'installation de libcurl."
+            exit 1
+        fi
+        echo "libcurl installé dans $INSTALL_DIR"
+    else
+        echo "libcurl déjà installé."
     fi
 }
 
@@ -64,10 +93,10 @@ compile_programs() {
     echo "Compilation des programmes..."
 
     # Compiler chaque fichier source avec les chemins libcurl et ncurses
-    gcc -o r r.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl  # Spécifie où trouver libcurl
-    gcc -o meta meta.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
-    gcc -o analyse analyse.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
-    gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
+    gcc -o r r.c -lncurses -ljansson -lcurl -L$INSTALL_DIR/lib -I$INSTALL_DIR/include  # Spécifie où trouver libcurl
+    gcc -o meta meta.c -lncurses -ljansson -lcurl -L$INSTALL_DIR/lib -I$INSTALL_DIR/include
+    gcc -o analyse analyse.c -lncurses -ljansson -lcurl -L$INSTALL_DIR/lib -I$INSTALL_DIR/include
+    gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl -L$INSTALL_DIR/lib -I$INSTALL_DIR/include
 
     if [ $? -ne 0 ]; then
         echo "Erreur lors de la compilation des programmes."
@@ -84,6 +113,7 @@ install() {
 
     # Appeler les fonctions pour l'installation
     install_dependencies
+    install_libcurl  # Installer libcurl si nécessaire
     replace_existing_files  # Vérification et remplacement des fichiers existants
     download_and_extract
     compile_programs
