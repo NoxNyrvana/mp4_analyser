@@ -54,7 +54,7 @@ install_windows() {
 
     # Compiler les fichiers source si nécessaire (Windows avec WSL ou Git Bash)
     echo "Compilation des sources..."
-    if gcc -o mp4_analyser.exe main.c meta.c analyse.c cryptage.c -lcurl -ljansson; then
+    if gcc -o mp4_analyser.exe r.c meta.c analyse.c cryptage.c -lcurl -ljansson; then
         echo "Compilation réussie."
     else
         echo "Erreur : la compilation a échoué."
