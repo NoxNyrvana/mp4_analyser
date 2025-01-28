@@ -42,18 +42,4 @@ gcc -o meta meta.c -lncurses -ljansson -lcurl
 gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl
 gcc -o analyse analyse.c -lncurses -ljansson -lcurl
 
-# Détecter le chemin du bureau pour Windows
-if [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "mingw"* ]]; then
-    # Pour Windows, récupérer le chemin du bureau
-    DESKTOP_PATH="$USERPROFILE/Desktop/mp4_analyser"
-    mkdir -p "$DESKTOP_PATH"
-    mv meta cryptage analyse "$DESKTOP_PATH"
-    echo "Les exécutables ont été déplacés vers $DESKTOP_PATH."
-else
-    # Pour les systèmes UNIX/Linux/Mac
-    mkdir -p ~/Desktop/mp4_analyser
-    mv meta cryptage analyse ~/Desktop/mp4_analyser/
-    echo "Les exécutables ont été déplacés vers ~/Desktop/mp4_analyser."
-fi
-
 echo "Installation terminée avec succès !"
