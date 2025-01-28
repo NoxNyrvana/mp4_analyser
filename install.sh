@@ -17,7 +17,7 @@ install_dependencies() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo "Installation des dépendances sur Linux..."
         sudo apt-get update
-        sudo apt-get install -y curl libncurses5-dev libjansson-dev
+        sudo apt-get install -y curl libncurses5-dev libjansson-dev libcurl4-openssl-dev  # Ajout de libcurl
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installation des dépendances sur macOS..."
         brew install curl ncurses jansson
@@ -56,13 +56,6 @@ replace_existing_files() {
         echo "README.md trouvé, remplacement en cours..."
         rm -f "$INSTALL_DIR/README.md"
     fi
-
-    # Ajoute ici d'autres fichiers que tu souhaites remplacer s'ils existent
-    # Exemple : si un fichier .gitignore existe, tu peux le supprimer :
-    if [ -f "$INSTALL_DIR/.gitignore" ]; then
-        echo ".gitignore trouvé, remplacement en cours..."
-        rm -f "$INSTALL_DIR/.gitignore"
-    fi
 }
 
 # Fonction pour compiler les fichiers source
@@ -70,11 +63,11 @@ compile_programs() {
     cd $INSTALL_DIR/mp4_analyser-main || exit
     echo "Compilation des programmes..."
 
-    # Compiler chaque fichier source
-    gcc -o r r.c -lncurses -ljansson -lcurl
-    gcc -o meta meta.c -lncurses -ljansson -lcurl
-    gcc -o analyse analyse.c -lncurses -ljansson -lcurl
-    gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl
+    # Compiler chaque fichier source avec les chemins libcurl et ncurses
+    gcc -o r r.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl  # Spécifie où trouver libcurl
+    gcc -o meta meta.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
+    gcc -o analyse analyse.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
+    gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl -L/usr/lib/x86_64-linux-gnu -I/usr/include/curl
 
     if [ $? -ne 0 ]; then
         echo "Erreur lors de la compilation des programmes."
