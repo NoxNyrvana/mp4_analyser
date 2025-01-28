@@ -8,9 +8,10 @@ ________________________________________________________________________________
 |____________________________________________________________________________________________________________|
 |____________________________________________________________________________________________________________|
 |DEBIAN UBUNTU:                                                                                              |
-|            sudo apt update && sudo apt install -y gcc make libcurl4-openssl-dev libjansson-dev             |
-|            curl -sSL https://raw.githubusercontent.com/NoxNyrvana/mp4_analyser/main/install.sh | sudo bash | 
-|____________________________________________________________________________________________________________|                                                                                                          |
+|            sudo apt update && sudo apt install -y gcc make libcurl4-openssl-dev libjansson-dev             |                                                                             
+|            sudo apt update && sudo apt install -y curl libncurses5-dev libncursesw5-dev libjansson-dev     |
+|            curl -sSL https://raw.githubusercontent.com/NoxNyrvana/mp4_analyser/main/install.sh | sudo bash |
+|____________________________________________________________________________________________________________|                                                                                                         |
 |____________________________________________________________________________________________________________|
 |MAC OS:                                                                                                     |
 |            brew install gcc make curl jansson                                                              |
