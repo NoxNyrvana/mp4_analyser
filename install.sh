@@ -57,9 +57,9 @@ cd mp4_analyser/mp4_analyser-main
 # Compilation des fichiers source en exécutables
 echo "Compilation des fichiers source..."
 
-gcc -o meta meta.c -lncurses -ljansson
-gcc -o cryptage cryptage.c -lncurses -ljansson
-gcc -o analyse analyse.c -lncurses -ljansson
+gcc -o meta meta.c -lncurses -ljansson -lcurl
+gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl
+gcc -o analyse analyse.c -lncurses -ljansson -lcurl
 
 # Déplacer les exécutables compilés sur le bureau
 echo "Déplacement des exécutables vers le bureau..."
