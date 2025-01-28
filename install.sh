@@ -40,7 +40,7 @@ download_and_extract() {
     fi
 
     echo "Extraction des fichiers..."
-    unzip -o -q mp4_analyser.zip -d $INSTALL_DIR  # Utilisation de l'option -o pour forcer l'écrasement
+    unzip mp4_analyser.zip -d $INSTALL_DIR  # Utilisation de l'option -o pour forcer l'écrasement
     if [ $? -ne 0 ]; then
         echo "Erreur lors de l'extraction des fichiers."
         exit 1
