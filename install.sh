@@ -35,9 +35,6 @@ curl -sSL https://github.com/NoxNyrvana/mp4_analyser/archive/refs/heads/main.zip
 echo "Décompression du fichier téléchargé..."
 unzip mp4_analyser.zip -d mp4_analyser
 
-echo "Déplacement vers le dossier décompressé..."
-cd mp4_analyser/mp4_analyser-main
-
 # Compilation des fichiers source en exécutables
 echo "Compilation des fichiers source..."
 
