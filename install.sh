@@ -17,7 +17,7 @@ install_dependencies() {
     if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         echo "Installation des dépendances sur Linux..."
         sudo apt-get update
-        sudo apt-get install -y curl libncurses5-dev libjansson-dev
+        sudo apt-get install -y curl libncurses5-dev libjansson-dev build-essential
     elif [[ "$OSTYPE" == "darwin"* ]]; then
         echo "Installation des dépendances sur macOS..."
         brew install curl ncurses jansson
@@ -43,16 +43,26 @@ install_libcurl() {
         tar -xvf curl-7.79.1.tar.gz
         cd curl-7.79.1
 
-        # Compilation de libcurl
+        # Vérification de la présence des outils nécessaires
+        if ! command -v autoconf &>/dev/null || ! command -v make &>/dev/null || ! command -v gcc &>/dev/null; then
+            echo "Les outils nécessaires (autoconf, make, gcc) ne sont pas installés. Veuillez les installer."
+            exit 1
+        fi
+
+        # Compilation de libcurl avec les bonnes options
         ./configure --prefix=$INSTALL_DIR
         make
+        if [ $? -ne 0 ]; then
+            echo "Erreur lors de la compilation de libcurl."
+            exit 1
+        fi
         make install
-
-        # Vérification de l'installation de libcurl
         if [ $? -ne 0 ]; then
             echo "Erreur lors de l'installation de libcurl."
             exit 1
         fi
+
+        # Vérification de l'installation de libcurl
         echo "libcurl installé dans $INSTALL_DIR"
     else
         echo "libcurl déjà installé."
