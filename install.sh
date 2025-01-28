@@ -52,9 +52,9 @@ replace_existing_files() {
     echo "Vérification des fichiers existants dans $INSTALL_DIR..."
 
     # Si README ou d'autres fichiers existent, les supprimer avant d'extraire les nouveaux fichiers
-    if [ -f "$INSTALL_DIR/README.md" ]; then
+    if [ -f "$INSTALL_DIR/mp4_analyser-main/README.md" ]; then
         echo "README.md trouvé, remplacement en cours..."
-        rm -f "$INSTALL_DIR/README.md"
+        rm -f "$INSTALL_DIR/mp4_analyser-main/README.md"
     fi
 
     # Ajoute ici d'autres fichiers que tu souhaites remplacer s'ils existent
