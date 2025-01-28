@@ -1,21 +1,5 @@
 #!/bin/bash
 
-# Fonction pour installer les dépendances sur Linux/macOS
-install_dependencies_linux_macos() {
-    echo "Installation des dépendances nécessaires..."
-
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Pour Linux (Debian/Ubuntu)
-        sudo apt update
-        sudo apt install -y curl libncurses5-dev libncursesw5-dev libjansson-dev
-    elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Pour macOS (Homebrew)
-        brew install curl ncurses jansson
-    fi
-
-    echo "Dépendances installées avec succès."
-}
-
 # Fonction pour installer les dépendances sur Windows (WSL ou Git Bash avec MSYS2)
 install_dependencies_windows() {
     echo "Installation des dépendances nécessaires sur Windows..."
@@ -61,11 +45,18 @@ gcc -o meta meta.c -lncurses -ljansson -lcurl
 gcc -o cryptage cryptage.c -lncurses -ljansson -lcurl
 gcc -o analyse analyse.c -lncurses -ljansson -lcurl
 
-# Déplacer les exécutables compilés sur le bureau
-echo "Déplacement des exécutables vers le bureau..."
-mkdir -p ~/Desktop/mp4_analyser
-mv meta cryptage analyse ~/Desktop/mp4_analyser/
+# Détecter le chemin du bureau pour Windows
+if [[ "$OSTYPE" == "cygwin" || "$OSTYPE" == "mingw"* ]]; then
+    # Pour Windows, récupérer le chemin du bureau
+    DESKTOP_PATH="$USERPROFILE/Desktop/mp4_analyser"
+    mkdir -p "$DESKTOP_PATH"
+    mv meta cryptage analyse "$DESKTOP_PATH"
+    echo "Les exécutables ont été déplacés vers $DESKTOP_PATH."
+else
+    # Pour les systèmes UNIX/Linux/Mac
+    mkdir -p ~/Desktop/mp4_analyser
+    mv meta cryptage analyse ~/Desktop/mp4_analyser/
+    echo "Les exécutables ont été déplacés vers ~/Desktop/mp4_analyser."
+fi
 
 echo "Installation terminée avec succès !"
-echo "Vous pouvez maintenant exécuter les programmes à partir du dossier ~/Desktop/mp4_analyser."
-
