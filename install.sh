@@ -47,6 +47,24 @@ download_and_extract() {
     fi
 }
 
+# Fonction pour remplacer les fichiers existants (comme README) si nécessaire
+replace_existing_files() {
+    echo "Vérification des fichiers existants dans $INSTALL_DIR..."
+
+    # Si README ou d'autres fichiers existent, les supprimer avant d'extraire les nouveaux fichiers
+    if [ -f "$INSTALL_DIR/README.md" ]; then
+        echo "README.md trouvé, remplacement en cours..."
+        rm -f "$INSTALL_DIR/README.md"
+    fi
+
+    # Ajoute ici d'autres fichiers que tu souhaites remplacer s'ils existent
+    # Exemple : si un fichier .gitignore existe, tu peux le supprimer :
+    if [ -f "$INSTALL_DIR/.gitignore" ]; then
+        echo ".gitignore trouvé, remplacement en cours..."
+        rm -f "$INSTALL_DIR/.gitignore"
+    fi
+}
+
 # Fonction pour compiler les fichiers source
 compile_programs() {
     cd $INSTALL_DIR/mp4_analyser-main || exit
@@ -73,6 +91,7 @@ install() {
 
     # Appeler les fonctions pour l'installation
     install_dependencies
+    replace_existing_files  # Vérification et remplacement des fichiers existants
     download_and_extract
     compile_programs
 
