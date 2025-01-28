@@ -22,7 +22,7 @@ install_linux_macos() {
 
     # Compiler les fichiers source si nécessaire (Linux/macOS)
     echo "Compilation des sources..."
-    if gcc -o mp4_analyser main.c meta.c analyse.c cryptage.c -lcurl -ljansson; then
+    if gcc -o mp4_analyser r.c meta.c analyse.c cryptage.c -lcurl -ljansson; then
         echo "Compilation réussie."
     else
         echo "Erreur : la compilation a échoué."
