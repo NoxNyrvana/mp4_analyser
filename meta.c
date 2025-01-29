@@ -29,14 +29,6 @@ long get_file_size(FILE *file) {
   return size;
 }
 
-// Function to convert MP4 timestamp to human-readable date
-void convert_mp4_time_to_date(uint32_t mp4_time, char *date_str, size_t date_str_size) {
-    // MP4 timestamps are in seconds since January 1, 1904
-    time_t raw_time = mp4_time - 2082844800U; // Convert to Unix timestamp (seconds since 1970)
-    struct tm *timeinfo = gmtime(&raw_time);
-    strftime(date_str, date_str_size, "%Y-%m-%d %H:%M:%S", timeinfo);
-}
-
 void calculate_framerate_and_ratio(FILE *file, Metadata *metadata, size_t *meta_count) {
     unsigned char buffer[BUFFER_SIZE];
     int width = 0, height = 0;
@@ -140,42 +132,50 @@ void calculate_duration(FILE *file, Metadata *metadata, size_t *meta_count) {
     (*meta_count)++;
 }
 
-void extract_creation_and_modification_dates(FILE *file, Metadata *metadata, size_t *meta_count) {
+void extract_creation_date(FILE *file, Metadata *metadata, size_t *meta_count) {
     unsigned char buffer[BUFFER_SIZE];
-    fseek(file, 0, SEEK_SET);
+    fseek(file, 0, SEEK_SET);  // Aller au début du fichier
 
     while (fread(buffer, 1, BUFFER_SIZE, file) > 0) {
         for (size_t i = 0; i < BUFFER_SIZE - 4; i++) {
+            // Recherche du marqueur "mvhd"
             if (memcmp(&buffer[i], "mvhd", 4) == 0) {
-                fseek(file, (long)(ftell(file) - BUFFER_SIZE + i + 4), SEEK_SET);
-                fread(buffer, 1, 100, file);
+                long mvhd_offset = ftell(file) - BUFFER_SIZE + i;
+                fseek(file, mvhd_offset + 4, SEEK_SET);  // Aller à la position de la boîte 'mvhd'
+                if (fread(buffer, 1, 100, file) <= 0) {
+                    // Si la lecture de la section "mvhd" échoue, retour
+                    return;
+                }
 
-                // Extract creation time
-                uint32_t creation_time = read_uint32(buffer + 4);
+                uint8_t version = buffer[0];
+                uint32_t creation_time;
+
+                if (version == 0) {
+                    // Version 0: les temps sont des entiers de 32 bits
+                    creation_time = read_uint32(buffer + 4);
+                } else if (version == 1) {
+                    // Version 1: les temps sont des entiers de 64 bits
+                    creation_time = (uint32_t)read_uint32(buffer + 12);  // Utiliser les 32 bits inférieurs
+                }
+
+                // Convertir le temps MP4 en temps Unix
+                time_t raw_time = creation_time - 2082844800U;
+                struct tm *timeinfo = gmtime(&raw_time);
                 char creation_date[256];
-                convert_mp4_time_to_date(creation_time, creation_date, sizeof(creation_date));
+                strftime(creation_date, sizeof(creation_date), "%Y-%m-%d %H:%M:%S", timeinfo);
+
+                // Stocker le résultat dans les métadonnées
                 snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "creation_date");
                 snprintf(metadata[*meta_count].value, sizeof(metadata[*meta_count].value), "%s", creation_date);
-                (*meta_count)++;
+                (*meta_count)++;  // Incrémenter le compteur de métadonnées
 
-                // Extract modification time
-                uint32_t modification_time = read_uint32(buffer + 8);
-                char modification_date[256];
-                convert_mp4_time_to_date(modification_time, modification_date, sizeof(modification_date));
-                snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "modification_date");
-                snprintf(metadata[*meta_count].value, sizeof(metadata[*meta_count].value), "%s", modification_date);
-                (*meta_count)++;
-
-                // Extract time scale
-                uint32_t time_scale = read_uint32(buffer + 12);
-                snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "time_scale");
-                snprintf(metadata[*meta_count].value, sizeof(metadata[*meta_count].value), "%u", time_scale);
-                (*meta_count)++;
-
-                return;
+                return;  // Quitter après avoir trouvé la date
             }
         }
     }
+    snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "creation_date");
+    snprintf(metadata[*meta_count].value, sizeof(metadata[*meta_count].value), "1970-01-01 00:00:00");
+    (*meta_count)++;
 }
 
 int extract_mp4_metadata(FILE *file, Metadata *metadata, size_t *meta_count) {
@@ -190,7 +190,7 @@ int extract_mp4_metadata(FILE *file, Metadata *metadata, size_t *meta_count) {
     extract_authors_and_directors(file, metadata, &count);
     calculate_duration(file, metadata, &count);
     calculate_framerate_and_ratio(file, metadata, &count);
-    extract_creation_and_modification_dates(file, metadata, &count);
+    extract_creation_date(file, metadata, &count);
     *meta_count = count;
     return 0;
 }
