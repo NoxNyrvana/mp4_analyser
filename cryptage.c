@@ -31,7 +31,7 @@ void encrypt_video(const char *input_file, const char *output_file, unsigned cha
     size_t bytes_read;
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), input_fp)) > 0) {
         for (size_t i = 0; i < bytes_read; i++) {
-            buffer[i] ^= key[i % KEY_SIZE]; 
+            buffer[i] ^= key[i % KEY_SIZE];
         }
         fwrite(buffer, 1, bytes_read, output_fp);
     }
@@ -58,7 +58,7 @@ void decrypt_video(const char *input_file, const char *output_file, unsigned cha
     size_t bytes_read;
     while ((bytes_read = fread(buffer, 1, sizeof(buffer), input_fp)) > 0) {
         for (size_t i = 0; i < bytes_read; i++) {
-            buffer[i] ^= key[i % KEY_SIZE]; 
+            buffer[i] ^= key[i % KEY_SIZE];
         }
         fwrite(buffer, 1, bytes_read, output_fp);
     }
@@ -70,7 +70,7 @@ void decrypt_video(const char *input_file, const char *output_file, unsigned cha
 int main(int argc, char *argv[]) {
     unsigned char key[KEY_SIZE];
     generate_key(key);
-    
+   
     char imput[100];
     strcpy(imput, argv[1]);
     encrypt_video(imput, "encrypted.mp4", key);
