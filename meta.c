@@ -9,8 +9,8 @@
 #define MAX_METADATA 128
 
 typedef struct {
-    char key[128];
-    char value[256];
+  char key[128];
+  char value[256];
 } Metadata;
 
 typedef struct {
@@ -19,21 +19,14 @@ typedef struct {
 } Atom;
 
 uint32_t read_uint32(const unsigned char *buffer) {
-    return (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
+  return (buffer[0] << 24) | (buffer[1] << 16) | (buffer[2] << 8) | buffer[3];
 }
 
 long get_file_size(FILE *file) {
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    return size;
-}
-
-int is_leap_year(int year) {
-    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
-        return 1;
-    }
-    return 0;
+  fseek(file, 0, SEEK_END);
+  long size = ftell(file);
+  fseek(file, 0, SEEK_SET);
+  return size;
 }
 
 void calculate_framerate_and_ratio(FILE *file, Metadata *metadata, size_t *meta_count) {
@@ -139,36 +132,6 @@ void calculate_duration(FILE *file, Metadata *metadata, size_t *meta_count) {
     (*meta_count)++;
 }
 
-void convert_and_print_date(unsigned long long seconds, char *creation_date) {
-    int year = 1904;
-    int month, day, hour, minute, second;
-    unsigned long long days = seconds / 86400;
-    unsigned long long remaining_seconds = seconds % 86400;
-
-    while (days >= (is_leap_year(year) ? 366 : 365)) {
-        days -= is_leap_year(year) ? 366 : 365;
-        year++;
-    }
-
-    unsigned int days_in_month[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
-    days_in_month[1] = is_leap_year(year) ? 29 : 28;
-
-    month = 0;
-    while (days >= days_in_month[month]) {
-        days -= days_in_month[month];
-        month++;
-    }
-    month += 1;
-    day = days + 1;
-
-    hour = remaining_seconds / 3600;
-    remaining_seconds %= 3600;
-    minute = remaining_seconds / 60;
-    second = remaining_seconds % 60;
-
-    snprintf(creation_date, 256, "%d-%02d-%02d %02d:%02d:%02d", year, month, day, hour, minute, second);
-}
-
 void extract_creation_date(FILE *file, Metadata *metadata, size_t *meta_count) {
     unsigned char buffer[BUFFER_SIZE];
     fseek(file, 0, SEEK_SET);  // Aller au début du fichier
@@ -196,8 +159,10 @@ void extract_creation_date(FILE *file, Metadata *metadata, size_t *meta_count) {
                 }
 
                 // Convertir le temps MP4 en temps Unix
+                time_t raw_time = creation_time - 2082844800U;
+                struct tm *timeinfo = gmtime(&raw_time);
                 char creation_date[256];
-                convert_and_print_date(creation_time, creation_date);
+                strftime(creation_date, sizeof(creation_date), "%Y-%m-%d %H:%M:%S", timeinfo);
 
                 // Stocker le résultat dans les métadonnées
                 snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "creation_date");
@@ -211,26 +176,6 @@ void extract_creation_date(FILE *file, Metadata *metadata, size_t *meta_count) {
     snprintf(metadata[*meta_count].key, sizeof(metadata[*meta_count].key), "creation_date");
     snprintf(metadata[*meta_count].value, sizeof(metadata[*meta_count].value), "1970-01-01 00:00:00");
     (*meta_count)++;
-}
-
-const char* get_file_type(const char *filename) {
-    const char *extension = strrchr(filename, '.');
-    if (!extension || extension == filename) {
-        return "Unknown";
-    }
-    if (strcmp(extension, ".mp4") == 0) {
-        return "MP4 Video File";
-    } else if (strcmp(extension, ".avi") == 0) {
-        return "AVI Video File";
-    } else if (strcmp(extension, ".mkv") == 0) {
-        return "MKV Video File";
-    } else if (strcmp(extension, ".mov") == 0) {
-        return "MOV Video File";
-    } else if (strcmp(extension, ".wmv") == 0) {
-        return "WMV Video File";
-    } else {
-        return "Unknown";
-    }
 }
 
 int extract_mp4_metadata(FILE *file, Metadata *metadata, size_t *meta_count) {
@@ -267,10 +212,13 @@ int extract_metadata(const char *filename, Metadata *metadata, size_t *meta_coun
     return result;
 }
 
-int main() {
-    char filename[256];
-    printf("Entrez le nom du fichier : ");
-    scanf("%255s", filename);
+int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Usage: %s <filename>\n", argv[0]);
+        return 1;
+    }
+
+    char *filename = argv[1];
 
     Metadata metadata[MAX_METADATA];
     size_t meta_count = 0;
@@ -282,8 +230,6 @@ int main() {
         if (extension) {
             printf("Extension: %s\n", extension + 1);
         }
-        const char *file_type = get_file_type(filename);
-        printf("File Type: %s\n", file_type);
         for (size_t i = 0; i < meta_count; i++) {
             printf("%s: %s\n", metadata[i].key, metadata[i].value);
         }
