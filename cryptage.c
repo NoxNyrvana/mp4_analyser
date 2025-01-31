@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#define KEY_SIZE 16 // Size of the encryption key
+#define KEY_SIZE 16 
 
 void generate_key(unsigned char *key) {
     printf("Enter the encryption key (16 bytes, hexadecimal): ");
